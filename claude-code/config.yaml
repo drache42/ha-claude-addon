@@ -1,5 +1,6 @@
 name: Claude Code
-version: "0.1.0"
+version: "0.2.0"
+image: ghcr.io/drache42/ha-claude-code
 slug: claude_code
 description: Claude Code with full admin access to Home Assistant, controllable via Remote Control
 url: https://github.com/drache42/ha-claude-addon
@@ -7,8 +8,8 @@ stage: experimental
 arch:
   - amd64
   - aarch64
-startup: application
-boot: auto
+# Defaults relied on: boot: auto, startup: application, ingress_port: 8099,
+# panel_admin: true (the linter rejects explicit default values).
 
 # Full admin: Supervisor API (admin role) + Core API proxy. The add-on token
 # (SUPERVISOR_TOKEN) is what the ha-api / ha-supervisor helpers use.
@@ -37,10 +38,8 @@ map:
 # Web terminal for first-time login and re-login (Remote Control needs a
 # full-scope claude.ai login; setup-token / API keys do not work).
 ingress: true
-ingress_port: 8099
 panel_icon: mdi:robot
 panel_title: Claude Code
-panel_admin: true
 
 # Keep the OAuth credentials out of HA backups (backups go to OneDrive).
 backup_exclude:
