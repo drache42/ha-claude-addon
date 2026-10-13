@@ -1,0 +1,22 @@
+configuration:
+  permission_mode:
+    name: Permission mode
+    description: >-
+      Starting permission mode for Remote Control sessions. "default" asks before
+      edits and commands, "acceptEdits" auto-approves file edits, "plan" is read-only
+      planning.
+  node_red_mcp_url:
+    name: Node-RED MCP URL
+    description: >-
+      Optional. Streamable-HTTP MCP endpoint of a Node-RED MCP server, for example
+      http://172.30.32.1:8001/mcp. Leave empty to skip.
+  zabbix_server:
+    name: Zabbix server
+    description: >-
+      Optional. Host or IP of a Zabbix server (port 10051) that receives the health
+      item. Leave empty to disable.
+  zabbix_host:
+    name: Zabbix host name
+    description: >-
+      Optional. Zabbix host that owns the trapper item remotecontrol.watchdog_failure
+      (1 = Remote Control down, 0 = up).

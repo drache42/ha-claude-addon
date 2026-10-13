@@ -1,0 +1,42 @@
+name: Lint and build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  addon-linter:
+    name: Add-on linter
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: frenck/action-addon-linter@v2
+        with:
+          path: ./claude-code
+
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run shellcheck
+        run: shellcheck claude-code/run.sh claude-code/ha-api claude-code/ha-supervisor
+
+  build:
+    name: Build image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: docker build --tag claude-code-addon-test claude-code
+      - name: Smoke test the entrypoint
+        run: |
+          mkdir -p data cfg
+          echo '{"permission_mode":"default"}' > data/options.json
+          docker run -d --name smoke -e SUPERVISOR_TOKEN=dummy \
+            -v "$PWD/data:/data" -v "$PWD/cfg:/homeassistant_config" claude-code-addon-test
+          sleep 15
+          docker logs smoke
+          docker exec smoke curl -fsS -o /dev/null http://127.0.0.1:7681/
+          docker exec smoke pgrep -x nginx

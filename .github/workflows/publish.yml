@@ -1,0 +1,54 @@
+name: Publish image
+
+# Builds the multi-arch add-on image and pushes it to ghcr.io. The tag is the
+# add-on version from claude-code/config.yaml, which is what the Supervisor pulls.
+# Bump `version` in config.yaml (and CHANGELOG.md) to ship a change.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "claude-code/**"
+      - ".github/workflows/publish.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read add-on version
+        id: ver
+        run: |
+          version="$(sed -n 's/^version: *"\{0,1\}\([^"]*\)"\{0,1\} *$/\1/p' claude-code/config.yaml | head -n1)"
+          test -n "$version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: claude-code
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/ha-claude-code:${{ steps.ver.outputs.version }}
+            ghcr.io/${{ github.repository_owner }}/ha-claude-code:latest
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.description=Claude Code Home Assistant add-on
+            org.opencontainers.image.licenses=MIT
+            io.hass.type=addon
+            io.hass.version=${{ steps.ver.outputs.version }}

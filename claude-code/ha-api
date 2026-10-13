@@ -1,0 +1,13 @@
+#!/bin/sh
+# Call the Home Assistant Core REST API as admin (via the Supervisor proxy).
+# usage: ha-api METHOD PATH [JSON_BODY]
+#   ha-api GET /states/sun.sun
+#   ha-api POST /services/light/turn_on '{"entity_id":"light.kitchen"}'
+#   ha-api POST /config/core/check_config
+[ $# -ge 2 ] || { echo "usage: ha-api METHOD PATH [JSON_BODY]" >&2; exit 2; }
+if [ $# -ge 3 ]; then
+    exec curl -sS -X "$1" -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" \
+        -H "Content-Type: application/json" -d "$3" "http://supervisor/core/api$2"
+fi
+exec curl -sS -X "$1" -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" \
+    -H "Content-Type: application/json" "http://supervisor/core/api$2"

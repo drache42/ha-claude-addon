@@ -1,0 +1,13 @@
+#!/bin/sh
+# Call the Supervisor REST API as admin (add-ons, backups, host, OS, network).
+# usage: ha-supervisor METHOD PATH [JSON_BODY]
+#   ha-supervisor GET /addons
+#   ha-supervisor POST /backups/new/full '{"name":"before-change"}'
+#   ha-supervisor POST /addons/core_ssh/restart
+[ $# -ge 2 ] || { echo "usage: ha-supervisor METHOD PATH [JSON_BODY]" >&2; exit 2; }
+if [ $# -ge 3 ]; then
+    exec curl -sS -X "$1" -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" \
+        -H "Content-Type: application/json" -d "$3" "http://supervisor$2"
+fi
+exec curl -sS -X "$1" -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" \
+    -H "Content-Type: application/json" "http://supervisor$2"
