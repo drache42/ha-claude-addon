@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.1
+
+- Enable the sidebar panel automatically on first start (HA leaves "Show in sidebar"
+  off by default, which hid the login terminal).
+
 ## 0.2.0
 
 - Use prebuilt multi-arch images from ghcr.io/drache42/ha-claude-code instead of

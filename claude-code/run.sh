@@ -142,6 +142,21 @@ ha_service() { # domain service json
         "$SUP/core/api/services/$1/$2" > /dev/null 2>&1
 }
 
+# HA leaves "Show in sidebar" off for new add-ons, which would hide the login
+# terminal. Turn it on once (marker file), so a user who later hides it keeps
+# their choice.
+enable_panel_once() {
+    local marker=/data/.panel-enabled
+    [ -f "$marker" ] && return 0
+    if sup -X POST -H "Content-Type: application/json" -d '{"ingress_panel": true}' \
+            "$SUP/addons/self/options" > /dev/null 2>&1; then
+        touch "$marker"
+        log "enabled the sidebar panel"
+    else
+        log "WARNING: could not enable the sidebar panel; turn on Show in sidebar on the add-on page"
+    fi
+}
+
 notify_down() {
     ha_service persistent_notification create "$(jq -n --arg m "$1" \
         '{notification_id:"claude_code_addon",title:"Claude Code add-on is down",message:$m}')"
@@ -185,6 +200,7 @@ start_ui() {
 log "starting Claude Code add-on"
 configure_mcp
 write_briefing
+enable_panel_once
 touch "$LOG"
 
 state=""            # up | down
