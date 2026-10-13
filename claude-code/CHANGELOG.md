@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.4
+
+- Show a friendly machine name in Remote Control instead of the container hostname
+  (`<hash>-claude-code`). New optional `hostname` setting, default `home-assistant`.
+
 ## 0.2.3
 
 - Fix Remote Control exiting immediately on first run: it needs a real terminal on

@@ -1,5 +1,5 @@
 name: Claude Code
-version: "0.2.3"
+version: "0.2.4"
 image: ghcr.io/drache42/ha-claude-code
 slug: claude_code
 description: Claude Code with full admin access to Home Assistant, controllable via Remote Control
@@ -49,6 +49,7 @@ options:
   permission_mode: default
 schema:
   permission_mode: list(default|acceptEdits|plan)
+  hostname: str?
   node_red_mcp_url: str?
   zabbix_server: str?
   zabbix_host: str?

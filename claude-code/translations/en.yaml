@@ -5,6 +5,11 @@ configuration:
       Starting permission mode for Remote Control sessions. "default" asks before
       edits and commands, "acceptEdits" auto-approves file edits, "plan" is read-only
       planning.
+  hostname:
+    name: Machine name
+    description: >-
+      Optional. Name shown for this machine in Remote Control (claude.ai/code and the
+      Claude app). Empty uses "home-assistant".
   node_red_mcp_url:
     name: Node-RED MCP URL
     description: >-

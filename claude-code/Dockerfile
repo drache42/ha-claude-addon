@@ -4,6 +4,11 @@
 # The Claude Code CLI is deliberately NOT pinned (same policy as claude-ssh):
 # @latest at build time, self-updating at runtime. A stale pinned CLI has
 # previously defaulted to a retired model id and 404'd on every request.
+FROM node:22-bookworm-slim AS shim
+RUN apt-get update && apt-get install -y --no-install-recommends gcc libc6-dev     && rm -rf /var/lib/apt/lists/*
+COPY hostname-shim.c /tmp/hostname-shim.c
+RUN gcc -shared -fPIC -O2 -o /hostname-shim.so /tmp/hostname-shim.c -ldl
+
 FROM node:22-bookworm-slim
 
 ENV DEBIAN_FRONTEND=noninteractive \
@@ -40,6 +45,7 @@ RUN set -e; arch="$(uname -m)"; \
 RUN npm install -g @anthropic-ai/claude-code@latest \
     && claude --version
 
+COPY --from=shim /hostname-shim.so /usr/local/lib/hostname-shim.so
 COPY ha-api ha-supervisor /usr/local/bin/
 COPY tmux.conf /etc/tmux.conf
 COPY nginx.conf /etc/nginx/claude-ingress.conf

@@ -187,8 +187,11 @@ start_rc() {
     local mode
     mode=$(opt permission_mode)
     [ -n "$mode" ] || mode=default
+    local host
+    host=$(opt hostname)
+    [ -n "$host" ] || host=home-assistant
     tmux new-session -d -s "$SESSION" -c "$WORKDIR" \
-        "sleep 1; exec claude remote-control --name 'Home Assistant' --permission-mode '$mode'" \
+        "sleep 1; export CLAUDE_FAKE_HOSTNAME='$host' LD_PRELOAD=/usr/local/lib/hostname-shim.so; exec claude remote-control --name 'Home Assistant' --permission-mode '$mode'" \
         || return 1
     tmux pipe-pane -t "$SESSION" "cat >> '$LOG'"
 }
