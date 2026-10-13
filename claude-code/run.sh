@@ -171,12 +171,31 @@ logged_in() {
 
 rc_alive() { tmux has-session -t "$SESSION" 2>/dev/null; }
 
+# True while the session is sitting at a one-time y/n prompt (Remote Control
+# confirmation, workspace trust). Only the last non-empty line counts, because
+# an answered prompt stays visible higher up in the pane.
+rc_waiting_prompt() {
+    tmux capture-pane -p -t "$SESSION" 2>/dev/null | grep -v '^[[:space:]]*$' | tail -n 1 \
+        | grep -Eqi '\(y/n\)[[:space:]]*$|\[y/N\][[:space:]]*$'
+}
+
+# Remote Control must keep stdout on a real terminal: with stdout redirected it
+# cannot ask its one-time confirmation or trust prompts and exits. So the
+# command runs on the tmux pty and tmux pipe-pane copies the output to $LOG.
+# The short sleep lets pipe-pane attach before the first output.
 start_rc() {
     local mode
     mode=$(opt permission_mode)
     [ -n "$mode" ] || mode=default
     tmux new-session -d -s "$SESSION" -c "$WORKDIR" \
-        "claude remote-control --name 'Home Assistant' --permission-mode '$mode' >> '$LOG' 2>&1"
+        "sleep 1; exec claude remote-control --name 'Home Assistant' --permission-mode '$mode'" \
+        || return 1
+    tmux pipe-pane -t "$SESSION" "cat >> '$LOG'"
+}
+
+log_tail() {
+    tail -n 15 "$LOG" 2>/dev/null | sed 's/\x1b\[[0-9;?]*[a-zA-Z]//g; s/\r//g' \
+        | grep -v '^[[:space:]]*$' | sed 's/^/  rc-log: /'
 }
 
 rotate_log() {
@@ -220,6 +239,9 @@ while true; do
         reason="Not signed in. Open the Claude Code panel in the HA sidebar and run: claude auth login"
     elif rc_alive; then
         fail_count=0
+        if rc_waiting_prompt; then
+            reason="Waiting for a one-time confirmation. In the Claude Code panel run: tmux attach -t remote-control"
+        fi
     elif [ "$now" -lt "$next_start_allowed" ]; then
         reason="Remote Control session is down (restart backoff active). See /data/remote-control.log"
     else
@@ -229,6 +251,9 @@ while true; do
         fi
         if rc_alive; then
             fail_count=0
+            if rc_waiting_prompt; then
+                reason="Waiting for a one-time confirmation. In the Claude Code panel run: tmux attach -t remote-control"
+            fi
         else
             fail_count=$((fail_count + 1))
             backoff=$((fail_count * BACKOFF_STEP_SECONDS))
@@ -236,6 +261,7 @@ while true; do
             next_start_allowed=$(( $(date +%s) + backoff ))
             reason="Remote Control session exited right after start. See /data/remote-control.log"
             log "WARNING: $reason (retry in ${backoff}s)"
+            log_tail
         fi
     fi
 

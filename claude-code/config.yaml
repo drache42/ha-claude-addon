@@ -1,5 +1,5 @@
 name: Claude Code
-version: "0.2.2"
+version: "0.2.3"
 image: ghcr.io/drache42/ha-claude-code
 slug: claude_code
 description: Claude Code with full admin access to Home Assistant, controllable via Remote Control

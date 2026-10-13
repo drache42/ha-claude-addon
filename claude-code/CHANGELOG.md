@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.3
+
+- Fix Remote Control exiting immediately on first run: it needs a real terminal on
+  stdout to ask its one-time confirmation and trust prompts, but output was redirected
+  to a file. The session now runs on the tmux terminal and tmux copies the output to
+  `/data/remote-control.log`.
+- Report "waiting for a one-time confirmation" (with the `tmux attach` hint) instead
+  of looking healthy while sitting at a prompt.
+- Print the tail of the Remote Control log in the add-on log when the session fails.
+
 ## 0.2.2
 
 - Turn tmux mouse capture off in the web terminal. It blocked right-click and paste,
