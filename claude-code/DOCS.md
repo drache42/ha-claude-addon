@@ -8,7 +8,8 @@ Claude mobile app.
 
 1. Install and start the add-on. It shows "Not signed in" in its log until you log in.
 2. Open **Claude Code** in the sidebar (admin users only). This is a web terminal.
-3. Run `claude auth login` and finish the sign-in with your claude.ai account.
+3. Run `claude auth login`, open the URL, sign in, and paste the code it gives you back
+   into the terminal (Ctrl+Shift+V, or right-click > Paste; Shift+Insert also works).
    Remote Control needs a full-scope login. `claude setup-token`, API keys and
    `CLAUDE_CODE_OAUTH_TOKEN` do not work for it.
 4. Within 30 seconds the add-on starts the Remote Control session by itself.

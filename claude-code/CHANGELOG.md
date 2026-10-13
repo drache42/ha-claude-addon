@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.2
+
+- Turn tmux mouse capture off in the web terminal. It blocked right-click and paste,
+  so the login code from `claude auth login` could not be pasted.
+
 ## 0.2.1
 
 - Enable the sidebar panel automatically on first start (HA leaves "Show in sidebar"
